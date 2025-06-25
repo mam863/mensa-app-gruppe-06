@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
@@ -48,3 +49,13 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+=======
+# mensa-app-gruppe-06
+mensa-app-gruppe-06 created by GitHub Classroom
+Gruppenmitglieder (Name, Matrikelnummer):
+Irma Sakwe Nakonji 585157;
+Marwa Omran 589105;
+Faranak Yekdaneh 592074;
+My Linh Chu 582484;
+
+>>>>>>> 2549829fb03dc1e5f9eea9de973ea1edeaa1d565
