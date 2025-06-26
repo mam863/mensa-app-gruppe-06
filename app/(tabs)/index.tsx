@@ -30,8 +30,7 @@ export default function LoginScreen() {
 
     return (
         <View style={styles.container}>
-            <Image source={require('../assets/icon_compressed.jpg')} style={styles.logo} />
-            <Text style={styles.title}>FeedMe</Text>
+            <Image source={require('../../assets/images/icon_mensa.png')} style={styles.logo} />
             <Text style={styles.subtitle}>Bitte gib deinen Namen ein:</Text>
             <TextInput
                 placeholder="z. B. Anna"
@@ -54,8 +53,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, alignItems: 'center', paddingTop: 100, backgroundColor: '#fff' },
-    logo: { width: 100, height: 100, marginBottom: 20 },
-    title: { fontSize: 28, fontWeight: 'bold' },
+    logo: { width: 180, height: 180, marginBottom: 20 },
     subtitle: { fontSize: 16, color: 'gray', marginVertical: 20 },
     input: {
         width: '80%', padding: 12, borderWidth: 1, borderColor: '#ccc',
