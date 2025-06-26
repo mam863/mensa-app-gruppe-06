@@ -53,7 +53,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, alignItems: 'center', paddingTop: 100, backgroundColor: '#fff' },
-    logo: { width: 180, height: 180, marginBottom: 20 },
+    logo: { width: 200, height: 200, marginBottom: 20 },
     subtitle: { fontSize: 16, color: 'gray', marginVertical: 20 },
     input: {
         width: '80%', padding: 12, borderWidth: 1, borderColor: '#ccc',
