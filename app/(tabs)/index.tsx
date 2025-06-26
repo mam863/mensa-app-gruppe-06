@@ -1,75 +1,74 @@
-import React from 'react';
-import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, TextInput, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function HomeScreen() {
+export default function LoginScreen() {
+    const [name, setName] = useState('');
+    const [isNewUser, setIsNewUser] = useState(false);
     const router = useRouter();
 
+    const handleLogin = async () => {
+        const savedName = await AsyncStorage.getItem('username');
+        if (savedName === name.trim()) {
+            router.push('/home'); // 🟢 weiter zur Startseite
+        } else {
+            Alert.alert('Name nicht gefunden', 'Bitte registriere dich zuerst.');
+            setIsNewUser(true);
+        }
+    };
+
+    const handleRegister = async () => {
+        if (name.trim().length === 0) {
+            Alert.alert('Ungültiger Name', 'Bitte gib einen gültigen Namen ein.');
+            return;
+        }
+        await AsyncStorage.setItem('username', name.trim());
+        Alert.alert('Registrierung erfolgreich', `Willkommen, ${name.trim()}!`);
+        router.push('/home');
+    };
+
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            {/* Logo */}
-            <Image
-                source={require('@/assets/images/feedme-logo.jpg')}
-                style={styles.logo}
-                resizeMode="contain"
-            />
-
-            {/* Suchfeld */}
+        <View style={styles.container}>
+            <Image source={require('../assets/icon_compressed.jpg')} style={styles.logo} />
+            <Text style={styles.title}>FeedMe</Text>
+            <Text style={styles.subtitle}>Bitte gib deinen Namen ein:</Text>
             <TextInput
-                style={styles.searchInput}
-                placeholder="Suche nach Mensa oder Gericht..."
-                placeholderTextColor="#888"
+                placeholder="z. B. Anna"
+                style={styles.input}
+                value={name}
+                onChangeText={setName}
             />
+            <Pressable style={styles.button} onPress={handleLogin}>
+                <Text style={styles.buttonText}>Anmelden</Text>
+            </Pressable>
 
-            {/* Knöpfe */}
-            <TouchableOpacity style={styles.button} onPress={() => router.push('/mensen')}>
-                <Text style={styles.buttonText}>📋 Mensen Liste</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.button} onPress={() => router.push('/menu')}>
-                <Text style={styles.buttonText}>🍽️ Speiseplan</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.button} onPress={() => router.push('/bewertung')}>
-                <Text style={styles.buttonText}>⭐ Bewertungen</Text>
-            </TouchableOpacity>
-        </ScrollView>
+            {isNewUser && (
+                <Pressable style={[styles.button, styles.secondaryButton]} onPress={handleRegister}>
+                    <Text style={styles.buttonText}>Registrieren</Text>
+                </Pressable>
+            )}
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 24,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-    },
-    logo: {
-        width: 220,
-        height: 180,
-        marginTop: 50,
-        marginBottom: 20,
-    },
-    searchInput: {
-        height: 48,
-        width: '100%',
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 10,
-        paddingHorizontal: 16,
-        fontSize: 16,
-        marginBottom: 30,
+    container: { flex: 1, alignItems: 'center', paddingTop: 100, backgroundColor: '#fff' },
+    logo: { width: 100, height: 100, marginBottom: 20 },
+    title: { fontSize: 28, fontWeight: 'bold' },
+    subtitle: { fontSize: 16, color: 'gray', marginVertical: 20 },
+    input: {
+        width: '80%', padding: 12, borderWidth: 1, borderColor: '#ccc',
+        borderRadius: 8, marginBottom: 20
     },
     button: {
-        backgroundColor: '#2ecc71',
-        paddingVertical: 14,
-        borderRadius: 10,
-        marginBottom: 16,
-        width: '100%',
-        alignItems: 'center',
+        backgroundColor: '#39e297', paddingVertical: 12, paddingHorizontal: 32,
+        borderRadius: 8, marginBottom: 10
+    },
+    secondaryButton: {
+        backgroundColor: '#666'
     },
     buttonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
+        color: '#fff', fontWeight: 'bold', fontSize: 16
+    }
 });

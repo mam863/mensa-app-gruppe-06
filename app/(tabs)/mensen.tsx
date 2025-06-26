@@ -45,7 +45,7 @@ export default function MensenScreen() {
         fetchMensen();
     }, []);
 
-    const renderItem = ({ item }) => (
+    const renderItem = ({ item }: { item: any }) => (
         <TouchableOpacity
             style={styles.item}
             onPress={() => router.push(`/mensa/${item.id}`)}
@@ -63,9 +63,9 @@ export default function MensenScreen() {
                 {item.businessDays?.length > 0
                     ? item.businessDays
                         .map(
-                            (day) =>
+                            (day: { day: any; businesshours: any[]; }) =>
                                 `${day.day}: ${
-                                    day.businesshours?.length > 0
+                                     day.businesshours?.length > 0
                                         ? day.businesshours
                                             .map((hour) => `${hour.openAt}–${hour.closeAt}`)
                                             .join(', ')
