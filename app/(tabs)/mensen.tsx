@@ -8,6 +8,8 @@ import {
     ActivityIndicator,
     Alert,
 } from 'react-native';
+
+const [canteenName, setCanteenName] = useState('');
 import { useRouter } from 'expo-router';
 
 export default function MensenScreen() {
@@ -49,6 +51,7 @@ export default function MensenScreen() {
         <TouchableOpacity
             style={styles.item}
             onPress={() => router.push(`/mensa/${item.id}`)}
+
         >
             <Text style={styles.name}>{item.name}</Text>
 
