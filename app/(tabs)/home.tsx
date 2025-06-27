@@ -25,7 +25,7 @@ export default function HomeScreen() {
                 <Text style={styles.buttonText}>📋 Mensen Liste</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button} onPress={() => router.push('/menu')}>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/speiseplan')}>
                 <Text style={styles.buttonText}>🍽️ Speiseplan</Text>
             </TouchableOpacity>
 
