@@ -8,17 +8,39 @@ import {
     Alert,
 } from 'react-native';
 
-const API_KEY = 'oQtJbCh2JMfR5uyzxob/tPI0uvtRVlSbEz4B6HRBy0t/9gWL+/7JnXqmMxG6QUJQUTrYpU0Qaw5caMl84+QU9NF5OkSovRT5g/3c8R/RGjKI9AyrJeUgYzCi7lG+LdZQTsGNeoBb0UE7rp+Z/AWR3jzeWJajiK6tS8P3z7W9jrg2iB5ZdoFqiWAAKje5aFwW4gA8RsDQxyvhSXxE1ceqJZd0xA9LhBKTbQsKwsTKxXf4hglPNpz6fECodjCX3uY3ixwIu1aT+UXc9bn4Rj530/WUg07P/p2eYbi75WYPOy5eFNKwh63Cuj8QuoXz5HmZJbQIoaPNV4ujn9e3NRb3Fg==';
+type Price = {
+    priceType: string;
+    price: number;
+};
+
+type Meal = {
+    ID?: number;
+    name?: string;
+    category?: string;
+    date: string;
+    canteenId: number;
+    prices?: Price[];
+};
+
+type DayData = {
+    date: string;
+    canteenId: number;
+    meals?: Meal[];
+};
+
+
+const API_KEY = 'eQqAIq+kKLDkHKJOQK99V4H/DWmFdkyBzvvL1ceWBGHjKTpoEITV/KVTsPa7NV10FHpEqZd78KMb/RAoihGylyXLkIs6hvU9ZnfdwltTt7l/CRJmgu6LA/PRH+9X5EH0F+N2/b6dO0AudBO4hjtRLVUg2aygxKvvpVAv0YaVQc9Sz1/crbpPTEImpoDYlrDPYBUZUjNgA88mJtc43f73Begxdm6EDPDTLQUWsPVqdzB5OM8Eci/nXx8SwYQxwM64I86otLkZ0SQilDoUmfnHREXT5MLrOcG8S914HH6OWYqNPSCPsQZClmhyYTrbLj79AfF5PozRA66w5JK8d/Sd+A==';
 
 export default function SpeiseplanScreen() {
-    const [meals, setMeals] = useState([]);
+    const [meals, setMeals] = useState<Meal[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchSpeiseplan = async () => {
+
             try {
                 const today = new Date().toISOString().split('T')[0];
-                const url = https://mensa.gregorflachs.de/api/v1/menue?loadingtype=complete&startdate=${today}&enddate=${today};
+                const url = `https://mensa.gregorflachs.de/api/v1/menue?loadingtype=complete&startdate=${today}&enddate=${today}`;
 
                 const response = await fetch(url, {
                     headers: {
@@ -28,14 +50,14 @@ export default function SpeiseplanScreen() {
                 });
 
                 if (!response.ok) {
-                    throw new Error(HTTP Fehler: ${response.status});
+                    throw new Error(`HTTP Fehler: ${response.status}`);
                 }
 
                 const data = await response.json();
-                const allMeals = [];
+                const allMeals: Meal[] = [];
 
-                data.forEach(day => {
-                    day.meals?.forEach(meal => {
+                (data as DayData[]).forEach((day) => {
+                    day.meals?.forEach((meal) => {
                         allMeals.push({
                             ...meal,
                             date: day.date,
@@ -43,6 +65,7 @@ export default function SpeiseplanScreen() {
                         });
                     });
                 });
+
 
                 setMeals(allMeals);
             } catch (error) {
@@ -56,21 +79,25 @@ export default function SpeiseplanScreen() {
         fetchSpeiseplan();
     }, []);
 
-    const renderItem = ({ item }) => (
+    const renderItem = ({ item }: { item: Meal }) => (
         <View style={styles.card}>
-            <Text style={styles.name}>{item.name  'Kein Name'}</Text>
-            <Text>Kategorie: {item.category  'Unbekannt'}</Text>
+            <Text style={styles.name}>{item.name || 'Kein Name'}</Text>
+            <Text>Kategorie: {item.category || 'Unbekannt'}</Text>
             <Text>Datum: {item.date}</Text>
             <Text>Mensa-ID: {item.canteenId}</Text>
+
             {item.prices?.length ? (
-                item.prices.map((price, idx) => (
-                    <Text key={idx}>Preis ({price.priceType}): {price.price} €</Text>
+                item.prices.map((price: Price, idx: number) => (
+                    <Text key={idx}>
+                        Preis ({price.priceType}): {price.price} €
+                    </Text>
                 ))
             ) : (
                 <Text>Keine Preisinformationen.</Text>
             )}
         </View>
     );
+
 
     if (loading) {
         return (
@@ -94,7 +121,7 @@ export default function SpeiseplanScreen() {
             <Text style={styles.title}>Speiseplan</Text>
             <FlatList
                 data={meals}
-                keyExtractor={(item, index) => ${item.ID || index}}
+                keyExtractor={(item, index) => (item.ID?.toString() || index.toString())}
                 renderItem={renderItem}
             />
         </View>

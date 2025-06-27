@@ -17,7 +17,7 @@ export default function MensenScreen() {
 
     const API_URL = 'https://mensa.gregorflachs.de/api/v1/canteen?loadingtype=complete';
     const API_KEY =
-        'oQtJbCh2JMfR5uyzxob/tPI0uvtRVlSbEz4B6HRBy0t/9gWL+/7JnXqmMxG6QUJQUTrYpU0Qaw5caMl84+QU9NF5OkSovRT5g/3c8R/RGjKI9AyrJeUgYzCi7lG+LdZQTsGNeoBb0UE7rp+Z/AWR3jzeWJajiK6tS8P3z7W9jrg2iB5ZdoFqiWAAKje5aFwW4gA8RsDQxyvhSXxE1ceqJZd0xA9LhBKTbQsKwsTKxXf4hglPNpz6fECodjCX3uY3ixwIu1aT+UXc9bn4Rj530/WUg07P/p2eYbi75WYPOy5eFNKwh63Cuj8QuoXz5HmZJbQIoaPNV4ujn9e3NRb3Fg==';
+        'eQqAIq+kKLDkHKJOQK99V4H/DWmFdkyBzvvL1ceWBGHjKTpoEITV/KVTsPa7NV10FHpEqZd78KMb/RAoihGylyXLkIs6hvU9ZnfdwltTt7l/CRJmgu6LA/PRH+9X5EH0F+N2/b6dO0AudBO4hjtRLVUg2aygxKvvpVAv0YaVQc9Sz1/crbpPTEImpoDYlrDPYBUZUjNgA88mJtc43f73Begxdm6EDPDTLQUWsPVqdzB5OM8Eci/nXx8SwYQxwM64I86otLkZ0SQilDoUmfnHREXT5MLrOcG8S914HH6OWYqNPSCPsQZClmhyYTrbLj79AfF5PozRA66w5JK8d/Sd+A==';
 
     useEffect(() => {
         const fetchMensen = async () => {
