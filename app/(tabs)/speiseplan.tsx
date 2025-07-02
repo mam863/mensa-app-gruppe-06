@@ -28,8 +28,8 @@ type DayData = {
     meals?: Meal[];
 };
 
-
-const API_KEY = 'eQqAIq+kKLDkHKJOQK99V4H/DWmFdkyBzvvL1ceWBGHjKTpoEITV/KVTsPa7NV10FHpEqZd78KMb/RAoihGylyXLkIs6hvU9ZnfdwltTt7l/CRJmgu6LA/PRH+9X5EH0F+N2/b6dO0AudBO4hjtRLVUg2aygxKvvpVAv0YaVQc9Sz1/crbpPTEImpoDYlrDPYBUZUjNgA88mJtc43f73Begxdm6EDPDTLQUWsPVqdzB5OM8Eci/nXx8SwYQxwM64I86otLkZ0SQilDoUmfnHREXT5MLrOcG8S914HH6OWYqNPSCPsQZClmhyYTrbLj79AfF5PozRA66w5JK8d/Sd+A==';
+const API_KEY =
+    'eQqAIq+kKLDkHKJOQK99V4H/DWmFdkyBzvvL1ceWBGHjKTpoEITV/KVTsPa7NV10FHpEqZd78KMb/RAoihGylyXLkIs6hvU9ZnfdwltTt7l/CRJmgu6LA/PRH+9X5EH0F+N2/b6dO0AudBO4hjtRLVUg2aygxKvvpVAv0YaVQc9Sz1/crbpPTEImpoDYlrDPYBUZUjNgA88mJtc43f73Begxdm6EDPDTLQUWsPVqdzB5OM8Eci/nXx8SwYQxwM64I86otLkZ0SQilDoUmfnHREXT5MLrOcG8S914HH6OWYqNPSCPsQZClmhyYTrbLj79AfF5PozRA66w5JK8d/Sd+A==';
 
 export default function SpeiseplanScreen() {
     const [meals, setMeals] = useState<Meal[]>([]);
@@ -37,7 +37,6 @@ export default function SpeiseplanScreen() {
 
     useEffect(() => {
         const fetchSpeiseplan = async () => {
-
             try {
                 const today = new Date().toISOString().split('T')[0];
                 const url = `https://mensa.gregorflachs.de/api/v1/menue?loadingtype=complete&startdate=${today}&enddate=${today}`;
@@ -45,7 +44,7 @@ export default function SpeiseplanScreen() {
                 const response = await fetch(url, {
                     headers: {
                         'X-API-KEY': API_KEY,
-                        'Accept': 'application/json',
+                        Accept: 'application/json',
                     },
                 });
 
@@ -66,12 +65,15 @@ export default function SpeiseplanScreen() {
                     });
                 });
 
-
                 setMeals(allMeals);
             } catch (error) {
                 console.error('Fehler beim Laden:', error);
-                Alert.alert('Fehler', 'Konnte Speiseplan nicht laden.');
+                Alert.alert(
+                    'Verbindungsproblem',
+                    'Keine Verbindung zum Server.\nBitte prüfe deine Internetverbindung und versuche es erneut.'
+                );
             } finally {
+                // ✅ هذا هو ما كان مفقوداً
                 setLoading(false);
             }
         };
@@ -87,8 +89,8 @@ export default function SpeiseplanScreen() {
             <Text>Mensa-ID: {item.canteenId}</Text>
 
             {item.prices?.length ? (
-                item.prices.map((price: Price, idx: number) => (
-                    <Text key={idx}>
+                item.prices.map((price, idx) => (
+                    <Text key={`${item.ID}-${price.priceType}-${idx}`}>
                         Preis ({price.priceType}): {price.price} €
                     </Text>
                 ))
@@ -97,7 +99,6 @@ export default function SpeiseplanScreen() {
             )}
         </View>
     );
-
 
     if (loading) {
         return (
@@ -111,17 +112,17 @@ export default function SpeiseplanScreen() {
     if (meals.length === 0) {
         return (
             <View style={styles.center}>
-                <Text>Keine Mahlzeiten gefunden.</Text>
+                <Text>Keine Mahlzeiten für heute verfügbar.</Text>
             </View>
         );
     }
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Speiseplan</Text>
+            <Text style={styles.title}>Speiseplan für heute</Text>
             <FlatList
                 data={meals}
-                keyExtractor={(item, index) => (item.ID?.toString() || index.toString())}
+                keyExtractor={(item, index) => item.ID?.toString() || `${item.canteenId}-${index}`}
                 renderItem={renderItem}
             />
         </View>

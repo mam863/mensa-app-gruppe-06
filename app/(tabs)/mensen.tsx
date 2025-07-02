@@ -68,7 +68,7 @@ export default function MensenScreen() {
                         .map(
                             (day: { day: any; businesshours: any[]; }) =>
                                 `${day.day}: ${
-                                     day.businesshours?.length > 0
+                                    day.businesshours?.length > 0
                                         ? day.businesshours
                                             .map((hour) => `${hour.openAt}–${hour.closeAt}`)
                                             .join(', ')
