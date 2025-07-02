@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useLocalSearchParams } from 'expo-router';
 import {
     View,
     Text,
@@ -7,7 +6,10 @@ import {
     ActivityIndicator,
     Alert,
     StyleSheet,
+    Pressable,
 } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Price = {
     priceType: string;
@@ -45,13 +47,11 @@ export default function MensaDetailScreen() {
                 const response = await fetch(url, {
                     headers: {
                         'X-API-KEY': API_KEY,
-                        'Accept': 'application/json',
+                        Accept: 'application/json',
                     },
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP Fehler: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP Fehler: ${response.status}`);
 
                 const data = await response.json();
                 const allMeals: Meal[] = [];
@@ -80,11 +80,36 @@ export default function MensaDetailScreen() {
         fetchSpeiseplan();
     }, [id]);
 
+    const handleAddFavorite = async (mealName: string) => {
+        try {
+            const username = await AsyncStorage.getItem('username');
+            if (!username) {
+                Alert.alert('Nicht eingeloggt');
+                return;
+            }
+
+            const key = `favoriteMeals_${username}`;
+            const existing = await AsyncStorage.getItem(key);
+            let mealList = existing ? JSON.parse(existing) : [];
+
+            if (!mealList.includes(mealName)) {
+                mealList.push(mealName);
+                await AsyncStorage.setItem(key, JSON.stringify(mealList));
+                Alert.alert('Hinzugefügt', `"${mealName}" wurde zu deinen Favoriten hinzugefügt.`);
+            } else {
+                Alert.alert('Schon vorhanden', `"${mealName}" ist bereits in deinen Favoriten.`);
+            }
+        } catch (error) {
+            console.error('Fehler beim Speichern', error);
+        }
+    };
+
     const renderItem = ({ item }: { item: Meal }) => (
         <View style={styles.card}>
             <Text style={styles.name}>{item.name || 'Kein Name'}</Text>
             <Text>Kategorie: {item.category || 'Unbekannt'}</Text>
             <Text>Datum: {item.date}</Text>
+
             {item.prices?.length ? (
                 item.prices.map((price, idx) => (
                     <Text key={idx}>
@@ -94,6 +119,13 @@ export default function MensaDetailScreen() {
             ) : (
                 <Text>Keine Preisinformationen.</Text>
             )}
+
+            <Pressable
+                style={styles.favButton}
+                onPress={() => handleAddFavorite(item.name || 'Unbenanntes Gericht')}
+            >
+                <Text style={styles.favButtonText}>⭐ Zu Favoriten</Text>
+            </Pressable>
         </View>
     );
 
@@ -154,5 +186,16 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#fff',
+    },
+    favButton: {
+        backgroundColor: '#39e297',
+        marginTop: 12,
+        paddingVertical: 8,
+        borderRadius: 6,
+    },
+    favButtonText: {
+        textAlign: 'center',
+        color: 'white',
+        fontWeight: 'bold',
     },
 });
