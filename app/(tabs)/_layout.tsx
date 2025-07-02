@@ -1,9 +1,9 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { Colors } from '@/constants/Colors';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
+import LoginScreen from "@/app/(tabs)/LoginScreen";
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
@@ -13,6 +13,17 @@ export default function TabLayout() {
             screenOptions={{
                 tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
                 headerShown: false,
+                tabBarStyle: {
+                    backgroundColor: '#fff',
+                    borderTopColor: '#eee',
+                    borderTopWidth: 1,
+                    height: 90,
+                    paddingBottom: 4,
+                    paddingTop: 4,
+                },
+                tabBarLabelStyle: {
+                    fontSize: 12,
+                },
             }}
         >
             <Tabs.Screen
@@ -20,25 +31,37 @@ export default function TabLayout() {
                 options={{
                     title: 'Home',
                     tabBarIcon: ({ color, focused }) => (
-                        <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+                        <MaterialCommunityIcons
+                            name={focused ? 'food' : 'food-outline'}
+                            size={24}
+                            color={color}
+                        />
                     ),
                 }}
             />
             <Tabs.Screen
-                name="explore"
+                name="mensen"
                 options={{
-                    title: 'Explore',
-                    tabBarIcon: ({ color, focused }) => (
-                        <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
+                    title: 'Mensen',
+                    tabBarIcon: ({ color }) => (
+                        <MaterialCommunityIcons
+                            name="office-building"
+                            size={24}
+                            color={color}
+                        />
                     ),
                 }}
             />
             <Tabs.Screen
-                name="settings"
+                name="speiseplan"
                 options={{
-                    title: 'Einstellungen',
-                    tabBarIcon: ({ color, focused }) => (
-                        <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color} />
+                    title: 'Speiseplan',
+                    tabBarIcon: ({ color }) => (
+                        <MaterialCommunityIcons
+                            name="silverware-fork-knife"
+                            size={24}
+                            color={color}
+                        />
                     ),
                 }}
             />
@@ -47,7 +70,59 @@ export default function TabLayout() {
                 options={{
                     title: 'Favoriten',
                     tabBarIcon: ({ color, focused }) => (
-                        <TabBarIcon name={focused ? 'heart' : 'heart-outline'} color={color} />
+                        <Ionicons
+                            name={focused ? 'heart' : 'heart-outline'}
+                            size={24}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="settings"
+                options={{
+                    title: 'Einstellungen',
+                    tabBarIcon: ({ color, focused }) => (
+                        <Ionicons
+                            name={focused ? 'settings' : 'settings-outline'}
+                            size={24}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="explore"
+                options={{
+                    title: 'Explore',
+                    tabBarIcon: ({ color, focused }) => (
+                        <Ionicons
+                            name={focused ? 'search' : 'search-outline'}
+                            size={24}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="LoginScreen"
+                options={{
+                    title: 'Login',
+                    tabBarIcon: ({ color, focused }) => (
+                        <MaterialCommunityIcons
+                            name="account-circle-outline"
+                            size={24}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="SurpriseMe"
+                options={{
+                    title: 'Surprise Me',
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="sparkles-outline" size={size} color={color} />
                     ),
                 }}
             />

@@ -1,70 +1,75 @@
-import React, { useEffect, useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    Alert,
-    Pressable,
-} from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useStorage } from '@/hooks/useStorage';
+// Datei: einstellungen.tsx
 
-export default function SettingsScreen() {
-    const [mensaList] = useStorage('mensaList', []);
-    const [username, setUsername] = useState<string | null>(null);
-    const [selectedMensa, setSelectedMensa] = useState<string | null>(null);
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Button, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Picker } from '@react-native-picker/picker';
+
+export default function EinstellungenScreen() {
+    const [username, setUsername] = useState('Marwa');
+    const [mensen, setMensen] = useState([]);
+    const [selectedMensa, setSelectedMensa] = useState('');
+
+    const API_URL = 'https://mensa.gregorflachs.de/api/v1/canteen?loadingtype=complete';
+    const API_KEY =
+        'eQqAIq+kKLDkHKJOQK99V4H/DWmFdkyBzvvL1ceWBGHjKTpoEITV/KVTsPa7NV10FHpEqZd78KMb/RAoihGylyXLkIs6hvU9ZnfdwltTt7l/CRJmgu6LA/PRH+9X5EH0F+N2/b6dO0AudBO4hjtRLVUg2aygxKvvpVAv0YaVQc9Sz1/crbpPTEImpoDYlrDPYBUZUjNgA88mJtc43f73Begxdm6EDPDTLQUWsPVqdzB5OM8Eci/nXx8SwYQxwM64I86otLkZ0SQilDoUmfnHREXT5MLrOcG8S914HH6OWYqNPSCPsQZClmhyYTrbLj79AfF5PozRA66w5JK8d/Sd+A==';
 
     useEffect(() => {
-        const loadUserAndFavorites = async () => {
-            const storedUsername = await AsyncStorage.getItem('username');
-            if (!storedUsername) {
-                Alert.alert('Fehler', 'Kein Benutzer eingeloggt.');
-                return;
-            }
-            setUsername(storedUsername);
-        };
-        loadUserAndFavorites();
+        fetchMensen();
+        loadFavoriteMensa();
     }, []);
 
-    const handleSaveFavorite = async () => {
-        if (username && selectedMensa) {
-            const key = `favoriteMensen_${username}`;
-            const stored = await AsyncStorage.getItem(key);
-            let favorites = stored ? JSON.parse(stored) : [];
+    const fetchMensen = async () => {
+        try {
+            const response = await fetch(API_URL, {
+                headers: {
+                    'X-API-KEY': API_KEY,
+                },
+            });
+            const data = await response.json();
+            setMensen(data);
+        } catch (error) {
+            console.error('Fehler beim Laden der Mensen:', error);
+            Alert.alert('Fehler', 'Konnte Mensen nicht laden.');
+        }
+    };
 
-            if (!favorites.includes(selectedMensa)) {
-                favorites.push(selectedMensa);
-                await AsyncStorage.setItem(key, JSON.stringify(favorites));
-                Alert.alert('Gespeichert', 'Diese Mensa wurde zu deinen Favoriten hinzugefügt.');
-            } else {
-                Alert.alert('Info', 'Diese Mensa ist bereits als Favorit gespeichert.');
-            }
+    const saveFavoriteMensa = async () => {
+        try {
+            await AsyncStorage.setItem('favoriteMensa', selectedMensa);
+            Alert.alert('Gespeichert', 'Lieblingsmensa wurde gespeichert.');
+        } catch (error) {
+            console.error('Speicherfehler:', error);
+        }
+    };
+
+    const loadFavoriteMensa = async () => {
+        try {
+            const saved = await AsyncStorage.getItem('favoriteMensa');
+            if (saved) setSelectedMensa(saved);
+        } catch (error) {
+            console.error('Fehler beim Laden der Lieblingsmensa:', error);
         }
     };
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Einstellungen</Text>
-            {username && (
-                <>
-                    <Text style={styles.label}>Angemeldet als: {username}</Text>
-                    <Text style={styles.label}>Lieblings-Mensa auswählen:</Text>
-                    <Picker
-                        selectedValue={selectedMensa}
-                        onValueChange={setSelectedMensa}
-                        style={styles.picker}
-                    >
-                        {mensaList.map((mensa) => (
-                            <Picker.Item key={mensa.id} label={mensa.name} value={mensa.id.toString()} />
-                        ))}
-                    </Picker>
+            <Text>Angemeldet als: {username}</Text>
+            <Text style={styles.label}>Lieblings-Mensa auswählen:</Text>
 
-                    <Pressable style={styles.button} onPress={handleSaveFavorite}>
-                        <Text style={styles.buttonText}>Als Lieblingsmensa speichern</Text>
-                    </Pressable>
-                </>
-            )}
+            <Picker
+                selectedValue={selectedMensa}
+                onValueChange={(itemValue) => setSelectedMensa(itemValue)}
+                style={styles.picker}
+            >
+                <Picker.Item label="-- Bitte wählen --" value="" />
+                {mensen.map((mensa: any) => (
+                    <Picker.Item key={mensa.id} label={mensa.name} value={mensa.id.toString()} />
+                ))}
+            </Picker>
+
+            <Button title="Als Lieblingsmensa speichern" onPress={saveFavoriteMensa} color="#17D171" />
         </View>
     );
 }
@@ -72,8 +77,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingTop: 60,
-        paddingHorizontal: 20,
+        padding: 24,
         backgroundColor: '#fff',
     },
     title: {
@@ -82,23 +86,11 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     label: {
-        fontSize: 16,
+        marginTop: 20,
         marginBottom: 10,
     },
     picker: {
-        backgroundColor: '#f2f2f2',
-    },
-    button: {
-        backgroundColor: '#39e297',
-        paddingVertical: 12,
-        paddingHorizontal: 32,
-        borderRadius: 8,
-        marginTop: 20,
-    },
-    buttonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 16,
-        textAlign: 'center',
+        backgroundColor: '#eee',
+        marginBottom: 20,
     },
 });
