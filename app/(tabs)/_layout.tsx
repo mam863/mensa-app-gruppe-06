@@ -3,7 +3,6 @@ import React from 'react';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import LoginScreen from "@/app/(tabs)/LoginScreen";
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
@@ -91,7 +90,6 @@ export default function TabLayout() {
                     ),
                 }}
             />
-
             <Tabs.Screen
                 name="SurpriseMe"
                 options={{

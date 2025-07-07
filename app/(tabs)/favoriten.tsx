@@ -1,38 +1,46 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
 export default function FavoritenScreen() {
-    const [username, setUsername] = useState<string | null>(null);
     const [favoriteMensaNames, setFavoriteMensaNames] = useState<string[]>([]);
     const [favoriteMeals, setFavoriteMeals] = useState<string[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const loadData = async () => {
-        const storedUsername = await AsyncStorage.getItem('username');
-        if (!storedUsername) return;
-        setUsername(storedUsername);
+        try {
+            console.log("🔄 Loading favorites...");
+            const [storedMensaIdsRaw, mensaListRaw, storedMealsRaw] = await Promise.all([
+                AsyncStorage.getItem('favoriteMensen'),
+                AsyncStorage.getItem('mensaList'),
+                AsyncStorage.getItem('favoriteMeals'),
+            ]);
 
-        const [storedMensaIdsRaw, mensaListRaw, storedMealsRaw] = await Promise.all([
-            AsyncStorage.getItem(`favoriteMensen_${storedUsername}`),
-            AsyncStorage.getItem('mensaList'),
-            AsyncStorage.getItem(`favoriteMeals_${storedUsername}`),
-        ]);
+            if (storedMensaIdsRaw && mensaListRaw) {
+                const ids = JSON.parse(storedMensaIdsRaw);
+                const list = JSON.parse(mensaListRaw);
 
-        if (storedMensaIdsRaw && mensaListRaw) {
-            const ids = JSON.parse(storedMensaIdsRaw);
-            const list = JSON.parse(mensaListRaw);
+                const names = ids
+                    .map((id: string) => list.find((m: any) => m.id === id))
+                    .filter(Boolean)
+                    .map((m: any) => m.name);
 
-            const names = ids
-                .map((id: string) => list.find((m: any) => m.id === id))
-                .filter(Boolean)
-                .map((m: any) => m.name);
+                setFavoriteMensaNames(names);
+            } else {
+                setFavoriteMensaNames([]);
+            }
 
-            setFavoriteMensaNames(names);
-        }
+            if (storedMealsRaw) {
+                setFavoriteMeals(JSON.parse(storedMealsRaw));
+            } else {
+                setFavoriteMeals([]);
+            }
 
-        if (storedMealsRaw) {
-            setFavoriteMeals(JSON.parse(storedMealsRaw));
+        } catch (error) {
+            console.error('❌ Fehler beim Laden der Favoriten:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -43,24 +51,29 @@ export default function FavoritenScreen() {
     );
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Deine Favoriten</Text>
-            {username && <Text>👤 Benutzer: {username}</Text>}
+        <ScrollView style={styles.container}>
+            <Text style={styles.title}>📌 Deine Favoriten</Text>
 
-            <Text style={styles.sectionTitle}>❤️ Lieblings-Mensen:</Text>
-            {favoriteMensaNames.length > 0 ? (
-                favoriteMensaNames.map((name, idx) => <Text key={idx}>• {name}</Text>)
+            {loading ? (
+                <Text>Lade Favoriten...</Text>
             ) : (
-                <Text>Noch keine Lieblingsmensa gewählt.</Text>
-            )}
+                <>
+                    <Text style={styles.sectionTitle}>❤️ Lieblings-Mensen:</Text>
+                    {favoriteMensaNames.length > 0 ? (
+                        favoriteMensaNames.map((name, idx) => <Text key={idx}>• {name}</Text>)
+                    ) : (
+                        <Text>Keine Lieblingsmensa gewählt.</Text>
+                    )}
 
-            <Text style={styles.sectionTitle}>⭐ Lieblings-Speisen:</Text>
-            {favoriteMeals.length > 0 ? (
-                favoriteMeals.map((meal, index) => <Text key={index}>• {meal}</Text>)
-            ) : (
-                <Text>Noch keine Lieblingsspeisen gespeichert.</Text>
+                    <Text style={styles.sectionTitle}>⭐ Lieblings-Speisen:</Text>
+                    {favoriteMeals.length > 0 ? (
+                        favoriteMeals.map((meal, index) => <Text key={index}>• {meal}</Text>)
+                    ) : (
+                        <Text>Keine Lieblingsspeisen gespeichert.</Text>
+                    )}
+                </>
             )}
-        </View>
+        </ScrollView>
     );
 }
 

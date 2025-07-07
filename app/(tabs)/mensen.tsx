@@ -8,8 +8,8 @@ import {
     ActivityIndicator,
     Alert,
 } from 'react-native';
-
-const [canteenName, setCanteenName] = useState('');
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 import { useRouter } from 'expo-router';
 
 export default function MensenScreen() {
@@ -24,18 +24,35 @@ export default function MensenScreen() {
     useEffect(() => {
         const fetchMensen = async () => {
             try {
-                const response = await fetch(API_URL, {
-                    headers: {
-                        'X-API-KEY': API_KEY,
-                    },
-                });
+                const netInfo = await NetInfo.fetch();
 
-                if (!response.ok) {
-                    throw new Error(`HTTP Fehler: ${response.status}`);
+                if (netInfo.isConnected) {
+                    // Online: fetch from API
+                    const response = await fetch(API_URL, {
+                        headers: {
+                            'X-API-KEY': API_KEY,
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP Fehler: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    setMensen(data);
+
+                    // Save to storage
+                    await AsyncStorage.setItem('mensaList', JSON.stringify(data));
+                } else {
+                    // Offline: load from storage
+                    const cached = await AsyncStorage.getItem('mensaList');
+                    if (cached) {
+                        const data = JSON.parse(cached);
+                        setMensen(data);
+                    } else {
+                        Alert.alert('Offline', 'Keine gespeicherten Mensen verfügbar.');
+                    }
                 }
-
-                const data = await response.json();
-                setMensen(data);
             } catch (error) {
                 console.error('Fehler beim Laden:', error);
                 Alert.alert('Fehler', 'Konnte Mensen nicht laden.');
@@ -51,7 +68,6 @@ export default function MensenScreen() {
         <TouchableOpacity
             style={styles.item}
             onPress={() => router.push(`/mensa/${item.id}`)}
-
         >
             <Text style={styles.name}>{item.name}</Text>
 
@@ -65,15 +81,14 @@ export default function MensenScreen() {
                 Öffnungszeiten:{' '}
                 {item.businessDays?.length > 0
                     ? item.businessDays
-                        .map(
-                            (day: { day: any; businesshours: any[]; }) =>
-                                `${day.day}: ${
-                                    day.businesshours?.length > 0
-                                        ? day.businesshours
-                                            .map((hour) => `${hour.openAt}–${hour.closeAt}`)
-                                            .join(', ')
-                                        : 'Keine Zeiten'
-                                }`
+                        .map((day: { day: any; businesshours: any[] }) =>
+                            `${day.day}: ${
+                                day.businesshours?.length > 0
+                                    ? day.businesshours
+                                        .map((hour) => `${hour.openAt}–${hour.closeAt}`)
+                                        .join(', ')
+                                    : 'Keine Zeiten'
+                            }`
                         )
                         .join(' | ')
                     : 'Keine Öffnungszeiten verfügbar'}
