@@ -6,6 +6,7 @@ import {
     FlatList,
     ActivityIndicator,
     Alert,
+    Button,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
@@ -30,91 +31,94 @@ type DayData = {
     meals?: Meal[];
 };
 
-const API_KEY =
-    'eQqAIq+kKLDkHKJOQK99V4H/DWmFdkyBzvvL1ceWBGHjKTpoEITV/KVTsPa7NV10FHpEqZd78KMb/RAoihGylyXLkIs6hvU9ZnfdwltTt7l/CRJmgu6LA/PRH+9X5EH0F+N2/b6dO0AudBO4hjtRLVUg2aygxKvvpVAv0YaVQc9Sz1/crbpPTEImpoDYlrDPYBUZUjNgA88mJtc43f73Begxdm6EDPDTLQUWsPVqdzB5OM8Eci/nXx8SwYQxwM64I86otLkZ0SQilDoUmfnHREXT5MLrOcG8S914HH6OWYqNPSCPsQZClmhyYTrbLj79AfF5PozRA66w5JK8d/Sd+A==';
+const API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your actual API key
 
 export default function SpeiseplanScreen() {
     const [meals, setMeals] = useState<Meal[]>([]);
     const [loading, setLoading] = useState(true);
+    const [dataSource, setDataSource] = useState<'online' | 'offline' | null>(null);
 
-    useEffect(() => {
-        const fetchSpeiseplan = async () => {
-            try {
-                const today = new Date().toISOString().split('T')[0];
-                const storageKey = `meals_${today}`;
+    const fetchSpeiseplan = async (showAlert = true) => {
+        try {
+            setLoading(true);
+            const today = new Date().toISOString().split('T')[0];
+            const storageKey = `meals_${today}`;
 
-                const netInfo = await NetInfo.fetch();
+            const netInfo = await NetInfo.fetch();
 
-                if (netInfo.isConnected) {
-                    // ✅ Online: fetch from API
-                    const url = `https://mensa.gregorflachs.de/api/v1/menue?loadingtype=complete&startdate=${today}&enddate=${today}`;
-                    const response = await fetch(url, {
-                        headers: {
-                            'X-API-KEY': API_KEY,
-                            Accept: 'application/json',
-                        },
-                    });
+            if (netInfo.isConnected) {
+                // ✅ Fetch data from API
+                const url = `https://mensa.gregorflachs.de/api/v1/menue?loadingtype=complete&startdate=${today}&enddate=${today}`;
+                const response = await fetch(url, {
+                    headers: {
+                        'X-API-KEY': API_KEY,
+                        Accept: 'application/json',
+                    },
+                });
 
-                    if (!response.ok) {
-                        throw new Error(`HTTP Fehler: ${response.status}`);
-                    }
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
 
-                    const data = await response.json();
-                    const allMeals: Meal[] = [];
+                const data = await response.json();
+                const allMeals: Meal[] = [];
 
-                    (data as DayData[]).forEach((day) => {
-                        day.meals?.forEach((meal) => {
-                            allMeals.push({
-                                ...meal,
-                                date: day.date,
-                                canteenId: day.canteenId,
-                            });
+                // ✅ Flatten meals from multiple canteens/days into a single list
+                (data as DayData[]).forEach((day) => {
+                    day.meals?.forEach((meal) => {
+                        allMeals.push({
+                            ...meal,
+                            date: day.date,
+                            canteenId: day.canteenId,
                         });
                     });
+                });
 
-                    setMeals(allMeals);
+                // ✅ Update state and store data locally
+                setMeals(allMeals);
+                await AsyncStorage.setItem(storageKey, JSON.stringify(allMeals));
+                setDataSource('online');
 
-                    // ✅ Save to AsyncStorage
-                    await AsyncStorage.setItem(storageKey, JSON.stringify(allMeals));
-                } else {
-                    // ✅ Offline: load from storage
-                    const cached = await AsyncStorage.getItem(storageKey);
-                    if (cached) {
-                        const parsed = JSON.parse(cached);
-                        setMeals(parsed);
-                    } else {
-                        Alert.alert('Offline', 'Keine gespeicherten Speisepläne verfügbar.');
-                    }
+                if (showAlert) {
+                    Alert.alert('Updated', 'Meals have been refreshed successfully.');
                 }
-            } catch (error) {
-                console.error('Fehler beim Laden:', error);
-                Alert.alert(
-                    'Verbindungsproblem',
-                    'Konnte Speiseplan nicht laden.\nBitte prüfe deine Verbindung.'
-                );
-            } finally {
-                setLoading(false);
+            } else {
+                // ✅ Load from cache if offline
+                const cached = await AsyncStorage.getItem(storageKey);
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    setMeals(parsed);
+                    setDataSource('offline');
+                } else {
+                    Alert.alert('Offline', 'No cached meals available for today.');
+                }
             }
-        };
+        } catch (error) {
+            console.error('Error loading meals:', error);
+            Alert.alert('Error', 'Failed to load meal data.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        fetchSpeiseplan();
+    useEffect(() => {
+        fetchSpeiseplan(false); // Initial fetch without alert
     }, []);
 
     const renderItem = ({ item }: { item: Meal }) => (
         <View style={styles.card}>
-            <Text style={styles.name}>{item.name || 'Kein Name'}</Text>
-            <Text>Kategorie: {item.category || 'Unbekannt'}</Text>
-            <Text>Datum: {item.date}</Text>
-            <Text>Mensa-ID: {item.canteenId}</Text>
-
+            <Text style={styles.name}>{item.name || 'No name'}</Text>
+            <Text>Category: {item.category || 'Unknown'}</Text>
+            <Text>Date: {item.date}</Text>
+            <Text>Canteen ID: {item.canteenId}</Text>
             {item.prices?.length ? (
                 item.prices.map((price, idx) => (
                     <Text key={`${item.ID}-${price.priceType}-${idx}`}>
-                        Preis ({price.priceType}): {price.price} €
+                        Price ({price.priceType}): {price.price} €
                     </Text>
                 ))
             ) : (
-                <Text>Keine Preisinformationen.</Text>
+                <Text>No price info available.</Text>
             )}
         </View>
     );
@@ -123,27 +127,37 @@ export default function SpeiseplanScreen() {
         return (
             <View style={styles.center}>
                 <ActivityIndicator size="large" color="#007bff" />
-                <Text style={{ marginTop: 10 }}>Lade Speiseplan...</Text>
-            </View>
-        );
-    }
-
-    if (meals.length === 0) {
-        return (
-            <View style={styles.center}>
-                <Text>Keine Mahlzeiten für heute verfügbar.</Text>
+                <Text style={{ marginTop: 10 }}>Loading meals...</Text>
             </View>
         );
     }
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Speiseplan für heute</Text>
-            <FlatList
-                data={meals}
-                keyExtractor={(item, index) => item.ID?.toString() || `${item.canteenId}-${index}`}
-                renderItem={renderItem}
-            />
+            <Text style={styles.title}>Today's Meals</Text>
+
+            {/* 🔄 Manual refresh button */}
+            <Button title="🔄 Refresh" onPress={() => fetchSpeiseplan()} />
+
+            {/* ℹ️ Show data source */}
+            {dataSource && (
+                <Text style={styles.sourceText}>
+                    Data source: {dataSource === 'online' ? '🌐 Online' : '📦 Offline (cached)'}
+                </Text>
+            )}
+
+            {meals.length === 0 ? (
+                <Text style={{ marginTop: 20 }}>No meals available today.</Text>
+            ) : (
+                <FlatList
+                    data={meals}
+                    keyExtractor={(item, index) =>
+                        item.ID?.toString() || `${item.canteenId}-${index}`
+                    }
+                    renderItem={renderItem}
+                    contentContainerStyle={{ paddingTop: 10 }}
+                />
+            )}
         </View>
     );
 }
@@ -176,5 +190,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#fff',
+    },
+    sourceText: {
+        marginTop: 10,
+        marginBottom: 10,
+        fontStyle: 'italic',
+        color: '#888',
     },
 });
