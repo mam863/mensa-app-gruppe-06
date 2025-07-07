@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 
@@ -108,8 +108,15 @@ export default function TabLayout() {
                     ),
                 }}
             />
-            <Tabs.Screen name="Bewertungen" options={{ title: "Bewertungen" }} />
-
+            <Tabs.Screen
+                name="Bewertungen"
+                options={{
+                    title: 'Bewertungen',
+                    tabBarIcon: ({ color }) => (
+                        <FontAwesome name="star" size={24} color={color} />
+                    ),
+                }}
+            />
         </Tabs>
     );
 }

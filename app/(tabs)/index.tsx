@@ -19,7 +19,7 @@ export default function IndexScreen() {
     const [meals, setMeals] = useState<any[]>([]);
 
     const API_KEY =
-        'eQqAIq+kKLDkHKJOQK99V4H/DWmFdkyBzvvL1ceWBGHjKTpoEITV/KVTsPa7NV10FHpEqZd78KMb/RAoihGylyXLkIs6hvU9ZnfdwltTt7l/CRJmgu6LA/PRH+9X5EH0F+N2/b6dO0AudBO4hjtRLVUg2aygxKvvpVAv0YaVQc9Sz1/crbpPTEImpoDYlrDPYBUZUjNgA88mJtc43f73Begxdm6EDPDTLQUWsPVqdzB5OM8Eci/nXx8SwYQxwM64I86otLkZ0SQilDoUmfnHREXT5MLrOcG8S914HH6OWYqNPSCPsQZClmhyYTrbLj79AfF5PozRA66w5JK8d/Sd+A=='
+        'eQqAIq+kKLDkHKJOQK99V4H/DWmFdkyBzvvL1ceWBGHjKTpoEITV/KVTsPa7NV10FHpEqZd78KMb/RAoihGylyXLkIs6hvU9ZnfdwltTt7l/CRJmgu6LA/PRH+9X5EH0F+N2/b6dO0AudBO4hjtRLVUg2aygxKvvpVAv0YaVQc9Sz1/crbpPTEImpoDYlrDPYBUZUjNgA88mJtc43f73Begxdm6EDPDTLQUWsPVqdzB5OM8Eci/nXx8SwYQxwM64I86otLkZ0SQilDoUmfnHREXT5MLrOcG8S914HH6OWYqNPSCPsQZClmhyYTrbLj79AfF5PozRA66w5JK8d/Sd+A==';
 
     useEffect(() => {
         const loadFavoriteMensa = async () => {
@@ -115,7 +115,6 @@ export default function IndexScreen() {
                             <Text>🍽️ {m.name}</Text>
                         </TouchableOpacity>
                     ))}
-
                 </View>
             )}
 
@@ -133,7 +132,7 @@ export default function IndexScreen() {
                 <Text style={styles.buttonText}>🍽️ Speiseplan</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/Bewertungen')}>
                 <Text style={styles.buttonText}>⭐ Bewertungen</Text>
             </TouchableOpacity>
         </ScrollView>
