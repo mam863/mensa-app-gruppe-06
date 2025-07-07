@@ -21,6 +21,9 @@
         "foregroundImage": "./assets/images/icon_mensa.png",
         "backgroundColor": "#17D171"
       }
-    }
+    },
+    "plugins": [
+      "expo-sqlite"
+    ]
   }
 }

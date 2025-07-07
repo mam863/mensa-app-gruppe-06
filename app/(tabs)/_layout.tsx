@@ -91,32 +91,7 @@ export default function TabLayout() {
                     ),
                 }}
             />
-            <Tabs.Screen
-                name="explore"
-                options={{
-                    title: 'Explore',
-                    tabBarIcon: ({ color, focused }) => (
-                        <Ionicons
-                            name={focused ? 'search' : 'search-outline'}
-                            size={24}
-                            color={color}
-                        />
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="LoginScreen"
-                options={{
-                    title: 'Login',
-                    tabBarIcon: ({ color, focused }) => (
-                        <MaterialCommunityIcons
-                            name="account-circle-outline"
-                            size={24}
-                            color={color}
-                        />
-                    ),
-                }}
-            />
+
             <Tabs.Screen
                 name="SurpriseMe"
                 options={{
