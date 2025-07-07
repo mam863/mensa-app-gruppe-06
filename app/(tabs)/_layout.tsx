@@ -99,6 +99,15 @@ export default function TabLayout() {
                     ),
                 }}
             />
+            <Tabs.Screen
+                name="KIFeature"
+                options={{
+                    title: 'KI Feature',
+                    tabBarIcon: ({ color }) => (
+                        <MaterialCommunityIcons name="robot-happy-outline" size={24} color={color} />
+                    ),
+                }}
+            />
         </Tabs>
     );
 }
