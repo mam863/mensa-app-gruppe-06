@@ -108,6 +108,8 @@ export default function TabLayout() {
                     ),
                 }}
             />
+            <Tabs.Screen name="Bewertungen" options={{ title: "Bewertungen" }} />
+
         </Tabs>
     );
 }
