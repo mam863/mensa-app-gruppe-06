@@ -7,6 +7,8 @@ import {
     ActivityIndicator,
     Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 
 type Price = {
     priceType: string;
@@ -39,41 +41,58 @@ export default function SpeiseplanScreen() {
         const fetchSpeiseplan = async () => {
             try {
                 const today = new Date().toISOString().split('T')[0];
-                const url = `https://mensa.gregorflachs.de/api/v1/menue?loadingtype=complete&startdate=${today}&enddate=${today}`;
+                const storageKey = `meals_${today}`;
 
-                const response = await fetch(url, {
-                    headers: {
-                        'X-API-KEY': API_KEY,
-                        Accept: 'application/json',
-                    },
-                });
+                const netInfo = await NetInfo.fetch();
 
-                if (!response.ok) {
-                    throw new Error(`HTTP Fehler: ${response.status}`);
-                }
+                if (netInfo.isConnected) {
+                    // ✅ Online: fetch from API
+                    const url = `https://mensa.gregorflachs.de/api/v1/menue?loadingtype=complete&startdate=${today}&enddate=${today}`;
+                    const response = await fetch(url, {
+                        headers: {
+                            'X-API-KEY': API_KEY,
+                            Accept: 'application/json',
+                        },
+                    });
 
-                const data = await response.json();
-                const allMeals: Meal[] = [];
+                    if (!response.ok) {
+                        throw new Error(`HTTP Fehler: ${response.status}`);
+                    }
 
-                (data as DayData[]).forEach((day) => {
-                    day.meals?.forEach((meal) => {
-                        allMeals.push({
-                            ...meal,
-                            date: day.date,
-                            canteenId: day.canteenId,
+                    const data = await response.json();
+                    const allMeals: Meal[] = [];
+
+                    (data as DayData[]).forEach((day) => {
+                        day.meals?.forEach((meal) => {
+                            allMeals.push({
+                                ...meal,
+                                date: day.date,
+                                canteenId: day.canteenId,
+                            });
                         });
                     });
-                });
 
-                setMeals(allMeals);
+                    setMeals(allMeals);
+
+                    // ✅ Save to AsyncStorage
+                    await AsyncStorage.setItem(storageKey, JSON.stringify(allMeals));
+                } else {
+                    // ✅ Offline: load from storage
+                    const cached = await AsyncStorage.getItem(storageKey);
+                    if (cached) {
+                        const parsed = JSON.parse(cached);
+                        setMeals(parsed);
+                    } else {
+                        Alert.alert('Offline', 'Keine gespeicherten Speisepläne verfügbar.');
+                    }
+                }
             } catch (error) {
                 console.error('Fehler beim Laden:', error);
                 Alert.alert(
                     'Verbindungsproblem',
-                    'Keine Verbindung zum Server.\nBitte prüfe deine Internetverbindung und versuche es erneut.'
+                    'Konnte Speiseplan nicht laden.\nBitte prüfe deine Verbindung.'
                 );
             } finally {
-                // ✅ هذا هو ما كان مفقوداً
                 setLoading(false);
             }
         };
