@@ -1,3 +1,4 @@
+import MealRating from '../(tabs)/MealRating';
 import React, { useEffect, useState } from 'react';
 import {
     View,
@@ -60,11 +61,16 @@ export default function MensaDetailScreen() {
                     if (day.canteenId.toString() === id) {
                         day.meals?.forEach((meal) => {
                             allMeals.push({
-                                ...meal,
+                                ID: meal.ID ?? meal.id ?? null,
+                                // <- Stelle sicher, dass ID vorhanden ist
+                                name: meal.name,
+                                category: meal.category,
+                                prices: meal.prices,
                                 date: day.date,
                                 canteenId: day.canteenId,
                             });
                         });
+
                     }
                 });
 
@@ -126,6 +132,9 @@ export default function MensaDetailScreen() {
             >
                 <Text style={styles.favButtonText}>⭐ Zu Favoriten</Text>
             </Pressable>
+
+            {/* Bewertungen direkt UNTER dem Gericht anzeigen */}
+            {item.ID && <MealRating mealId={item.ID} mealName={item.name} />}
         </View>
     );
 
