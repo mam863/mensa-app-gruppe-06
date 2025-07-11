@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Button, Alert, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// ✅ ضع هنا مفتاح API الصحيح الخاص بك
 const GEMINI_API_KEY = 'AIzaSyCvfpW-aL6Ro8yF3vM4RH1mOHDXEEDx_1w';
 
 export default function KIFeature() {
@@ -19,7 +18,7 @@ export default function KIFeature() {
                 const names = parsed.map((m: any) => m.name).filter((name: string) => !!name);
                 setMeals(names);
             } else {
-                Alert.alert('No meals found', 'Please open the Speiseplan screen at least once.');
+                Alert.alert('Keine Gerichte gefunden', 'Bitte öffne den Speiseplan-Bildschirm mindestens einmal.');
             }
         };
         loadMeals();
@@ -27,15 +26,15 @@ export default function KIFeature() {
 
     const askGemini = async () => {
         if (meals.length === 0) {
-            Alert.alert('No meals available', 'Cannot generate suggestion.');
+            Alert.alert('Keine Gerichte verfügbar', 'Vorschlag kann nicht generiert werden.');
             return;
         }
 
         setLoading(true);
         setSuggestion(null);
 
-        // ✅ إنشاء prompt قبل الاستخدام
-        const prompt = `Here is a list of meals: ${meals.join(', ')}. Suggest one meal that would be a good choice today and explain why in one short sentence.`;
+        // ✨ Prompt auf Deutsch
+        const prompt = `Hier ist eine Liste von Gerichten: ${meals.join(', ')}. Schlage ein Gericht vor, das heute eine gute Wahl wäre, und erkläre in einem kurzen Satz warum.`;
 
         try {
             const response = await fetch(
@@ -63,11 +62,11 @@ export default function KIFeature() {
                 setSuggestion(text);
             } else {
                 console.error('Gemini error:', data);
-                Alert.alert('Error', 'Failed to get suggestion from Gemini.');
+                Alert.alert('Fehler', 'Konnte keinen Vorschlag von Gemini erhalten.');
             }
         } catch (error) {
-            console.error('Gemini API error:', error);
-            Alert.alert('Error', 'Something went wrong with Gemini.');
+            console.error('Gemini API Fehler:', error);
+            Alert.alert('Fehler', 'Beim Zugriff auf Gemini ist etwas schiefgelaufen.');
         } finally {
             setLoading(false);
         }
@@ -75,8 +74,8 @@ export default function KIFeature() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>🎓 KI Feature – Meal Suggestion</Text>
-            <Button title="🔍 Suggest a Meal" onPress={askGemini} disabled={loading} />
+            <Text style={styles.title}>🎓 KI Funktion – Essensvorschlag</Text>
+            <Button title="🔍 Gericht vorschlagen" onPress={askGemini} disabled={loading} />
 
             {loading && (
                 <View style={{ marginTop: 20 }}>
