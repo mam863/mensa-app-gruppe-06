@@ -41,10 +41,11 @@ export default function MensaDetailScreen() {
 
     useEffect(() => {
         const fetchSpeiseplan = async () => {
-            try {
-                const today = new Date().toISOString().split('T')[0];
-                const url = `https://mensa.gregorflachs.de/api/v1/menue?loadingtype=complete&startdate=${today}&enddate=${today}`;
+            const today = new Date().toISOString().split('T')[0];
+            const cacheKey = `meals_${today}_canteen_${id}`;
 
+            try {
+                const url = `https://mensa.gregorflachs.de/api/v1/menue?loadingtype=complete&startdate=${today}&enddate=${today}`;
                 const response = await fetch(url, {
                     headers: {
                         'X-API-KEY': API_KEY,
@@ -62,7 +63,6 @@ export default function MensaDetailScreen() {
                         day.meals?.forEach((meal) => {
                             allMeals.push({
                                 ID: meal.ID ?? meal.id ?? null,
-                                // <- Stelle sicher, dass ID vorhanden ist
                                 name: meal.name,
                                 category: meal.category,
                                 prices: meal.prices,
@@ -70,14 +70,20 @@ export default function MensaDetailScreen() {
                                 canteenId: day.canteenId,
                             });
                         });
-
                     }
                 });
 
                 setMeals(allMeals);
+                await AsyncStorage.setItem(cacheKey, JSON.stringify(allMeals));
             } catch (error) {
                 console.error('Fehler beim Laden:', error);
-                Alert.alert('Fehler', 'Konnte Speiseplan nicht laden.');
+                const cached = await AsyncStorage.getItem(cacheKey);
+                if (cached) {
+                    setMeals(JSON.parse(cached));
+                    Alert.alert('Offline', 'Es wird ein gespeicherter Speiseplan angezeigt.');
+                } else {
+                    Alert.alert('Fehler', 'Konnte Speiseplan nicht laden und keine gespeicherten Daten gefunden.');
+                }
             } finally {
                 setLoading(false);
             }
@@ -86,24 +92,19 @@ export default function MensaDetailScreen() {
         fetchSpeiseplan();
     }, [id]);
 
-    const handleAddFavorite = async (mealName: string) => {
+    const handleAddFavorite = async (meal: Meal) => {
         try {
-            const username = await AsyncStorage.getItem('username');
-            if (!username) {
-                Alert.alert('Nicht eingeloggt');
-                return;
-            }
-
-            const key = `favoriteMeals_${username}`;
+            const key = 'mealFavorites';
             const existing = await AsyncStorage.getItem(key);
-            let mealList = existing ? JSON.parse(existing) : [];
+            let mealList: Meal[] = existing ? JSON.parse(existing) : [];
 
-            if (!mealList.includes(mealName)) {
-                mealList.push(mealName);
+            const alreadyExists = mealList.some((m) => m.ID === meal.ID);
+            if (!alreadyExists) {
+                mealList.push(meal);
                 await AsyncStorage.setItem(key, JSON.stringify(mealList));
-                Alert.alert('Hinzugefügt', `"${mealName}" wurde zu deinen Favoriten hinzugefügt.`);
+                Alert.alert('Hinzugefügt', `"${meal.name}" wurde zu deinen Favoriten hinzugefügt.`);
             } else {
-                Alert.alert('Schon vorhanden', `"${mealName}" ist bereits in deinen Favoriten.`);
+                Alert.alert('Schon vorhanden', `"${meal.name}" ist bereits in deinen Favoriten.`);
             }
         } catch (error) {
             console.error('Fehler beim Speichern', error);
@@ -128,12 +129,11 @@ export default function MensaDetailScreen() {
 
             <Pressable
                 style={styles.favButton}
-                onPress={() => handleAddFavorite(item.name || 'Unbenanntes Gericht')}
+                onPress={() => handleAddFavorite(item)}
             >
                 <Text style={styles.favButtonText}>⭐ Zu Favoriten</Text>
             </Pressable>
 
-            {/* Bewertungen direkt UNTER dem Gericht anzeigen */}
             {item.ID && <MealRating mealId={item.ID} mealName={item.name} />}
         </View>
     );
