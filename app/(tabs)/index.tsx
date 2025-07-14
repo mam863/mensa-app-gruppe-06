@@ -132,6 +132,12 @@ export default function IndexScreen() {
                 <Text style={styles.buttonText}>🍽️ Speiseplan</Text>
             </TouchableOpacity>
 
+<<<<<<< HEAD
+=======
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/Bewertungen')}>
+                <Text style={styles.buttonText}>⭐ Bewertungen</Text>
+            </TouchableOpacity>
+>>>>>>> 9293565d1c65379824e6d12413f7cd9823d9fd90
         </ScrollView>
     );
 }
