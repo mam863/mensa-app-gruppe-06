@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "FeedMe",
+    "slug": "feedme",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon_mensa.png",
+    "splash": {
+      "image": "./assets/images/splash_mensa.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#17D171"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon_mensa.png",
+        "backgroundColor": "#17D171"
+      }
+    },
+    "plugins": [
+      "expo-sqlite"
+    ]
+  }
+}
