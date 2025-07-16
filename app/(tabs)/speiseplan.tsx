@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useEffect, useState } from 'react';
 import {
     View,
@@ -200,7 +199,6 @@ const styles = StyleSheet.create({
         color: '#888',
     },
 });
-=======
 import React, { useEffect, useState } from 'react';
 import {
     View,
@@ -402,4 +400,3 @@ const styles = StyleSheet.create({
         color: '#888',
     },
 });
->>>>>>> 9293565d1c65379824e6d12413f7cd9823d9fd90
