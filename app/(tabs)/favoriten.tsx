@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState, useCallback } from "react";
 import {
   View,
@@ -212,7 +211,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     textAlign: "center",
   },
-=======
 import React, { useEffect, useState, useCallback } from 'react';
 import {
     View,
@@ -383,5 +381,4 @@ const styles = StyleSheet.create({
         color: '#888',
         marginBottom: 20,
     },
->>>>>>> 9293565d1c65379824e6d12413f7cd9823d9fd90
 });
